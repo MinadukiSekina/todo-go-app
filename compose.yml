@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UID: ${UID:-20000}
+        GID: ${GID:-20000}
+    tty: true
+    volumes:
+      - .:/app
+    ports:
+      - 8080:8080
+      - 2345:2345
