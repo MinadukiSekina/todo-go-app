@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Remote Delve",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "remotePath": "${workspaceFolder}",
+            "port": 2345,
+            "host": "localhost",
+            "showLog": true,
+            "console": "integratedTerminal",
+            "trace": "verbose"
+        }
+    ]
+}
