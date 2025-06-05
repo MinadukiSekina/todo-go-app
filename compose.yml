@@ -6,9 +6,24 @@ services:
       args:
         UID: ${UID:-20000}
         GID: ${GID:-20000}
+    depends_on:
+      - db
     tty: true
     volumes:
       - .:/app
     ports:
       - 8080:8080
       - 2345:2345
+  db:
+    build:
+      context: ./db
+      dockerfile: db.Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db/data:/var/lib/mysql
