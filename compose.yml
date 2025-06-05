@@ -6,6 +6,8 @@ services:
       args:
         UID: ${UID:-20000}
         GID: ${GID:-20000}
+    depends_on:
+      - db
     tty: true
     volumes:
       - .:/app
