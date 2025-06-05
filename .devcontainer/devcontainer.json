@@ -34,7 +34,9 @@
 	// "shutdownAction": "none",
 
 	// Uncomment the next line to run commands after the container is created.
-	"postCreateCommand": "cd /app && air -c .air.toml"
+	// "postCreateCommand": "cd /app && air -c .air.toml",
+	
+	"postStartCommand": "cd /app && air -c .air.toml"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
