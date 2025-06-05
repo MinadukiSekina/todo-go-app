@@ -1,8 +1,15 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/MinadukiSekina/todo-go-app/app/db"
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
+
+	// DBの初期化
+	db.Init()
+
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*/*.html")
