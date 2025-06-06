@@ -10,7 +10,7 @@ type todoRepository struct {
 }
 
 func NewTodoRepository(sqlHandler SqlHandler) repository.TodoRepository {
-	todoRepository := todoRepository{sqlHandler}
+	todoRepository := todoRepository{SqlHandler: sqlHandler}
 	return &todoRepository
 }
 
@@ -22,7 +22,7 @@ func (tr *todoRepository) FindAll() (*[]models.Todo, error) {
 
 func (tr *todoRepository) FindById(id uint) (*models.Todo, error) {
 	var todo models.Todo
-	result := tr.GetConnection().Where("id = ?", id).Find(&todo)
+	result := tr.GetConnection().Where("id = ?", id).First(&todo)
 	return &todo, result.Error
 }
 
