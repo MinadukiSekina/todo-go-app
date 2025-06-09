@@ -3,6 +3,7 @@ package handlers
 import (
 	"strconv"
 
+	"github.com/MinadukiSekina/todo-go-app/app/domain/models"
 	"github.com/MinadukiSekina/todo-go-app/app/usecases"
 	"github.com/gin-gonic/gin"
 )
@@ -36,5 +37,9 @@ func (th *TodoHandler) Show(c *gin.Context) {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, todos)
+	c.HTML(200, "todo/show.html", gin.H{
+		"todos":      todos,
+		"NotStarted": models.NotStarted,
+		"Done":       models.Done,
+	})
 }

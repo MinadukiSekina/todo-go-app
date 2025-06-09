@@ -1,0 +1,111 @@
+{{ define "todo/show.html" }}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo一覧</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .todo-list {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
+        .todo-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .todo-title {
+            font-size: 1.1em;
+            color: #333;
+        }
+        .todo-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-pending {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        .add-button {
+            background-color: #2196f3;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            height: 40px;
+            box-sizing: border-box;
+        }
+        .add-button:hover {
+            background-color: #1976d2;
+        }
+        .no-items {
+            text-align: left;
+            padding: 40px 20px;
+            color: #666;
+        }
+        .no-items-message {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="todo-list">
+        <div class="header">
+            <h1>Todo一覧</h1>
+            <a href="/todos/new" class="add-button">新しいTodoを追加</a>
+        </div>
+        {{ if gt (len .todos) 0 }}
+            {{ range .todos }}
+            <div class="todo-item">
+                <span class="todo-title">{{ .Title }}</span>
+                <span class="todo-status {{ if eq .Status $.NotStarted }}status-pending{{ else }}status-completed{{ end }}">
+                    {{ if eq .Status $.NotStarted }}未完了{{ else }}完了{{ end }}
+                </span>
+            </div>
+            {{ end }}
+        {{ else }}
+            <div class="no-items">
+                <p class="no-items-message">Todoはありません。</p>
+                <p class="no-items-message">「新しいTodoを追加」ボタンから登録してください。</p>
+            </div>
+        {{ end }}
+    </div>
+</body>
+</html>
+{{ end }}
