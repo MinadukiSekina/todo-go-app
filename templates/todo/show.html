@@ -1,10 +1,10 @@
-{{ define "todo/index.html" }}
+{{ define "todo/show.html" }}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo一覧</title>
+    <title>Todo詳細</title>
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -89,6 +89,13 @@
         .btn-primary:hover {
             background-color: #1976d2;
         }
+        .btn-back {
+            background-color: #2196f3;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #1976d2;
+        }
         .todo-item {
             padding: 15px;
             border-bottom: 1px solid #eee;
@@ -98,9 +105,6 @@
         }
         .todo-item:last-child {
             border-bottom: none;
-        }
-        .todo-item:hover {
-            cursor: pointer;
         }
         .todo-title {
             font-size: 1.1em;
@@ -132,43 +136,21 @@
 <body>
     <div class="todo-list">
         <div class="header">
-            <h1>Todo一覧</h1>
+            <h1>{{.todo.Title}}</h1>
+            <a class="btn btn-back" href="/todo">一覧に戻る</a>
         </div>
         <div class="todo-form">
-            <form method="post" action="/todo">
+            <form method="post" action="/todo/{{.todo.ID}}">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="title">新しいタスク</label>
-                        <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required>
+                        <label for="title">タスクのタイトル</label>
+                        <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required value="{{.todo.Title}}">
                     </div>
-                    <button type="submit" class="btn btn-primary">追加</button>
+                    <button type="submit" class="btn btn-primary">更新</button>
                 </div>
             </form>
         </div>
-        {{ if gt (len .todos) 0 }}
-            {{ range .todos }}
-            <div class="todo-item" data-id="{{.ID}}">
-                <span class="todo-title">{{ .Title }}</span>
-                <span class="todo-status {{ if eq .Status $.NotStarted }}status-pending{{ else }}status-completed{{ end }}">
-                    {{ if eq .Status $.NotStarted }}未完了{{ else }}完了{{ end }}
-                </span>
-            </div>
-            {{ end }}
-        {{ else }}
-            <div class="no-items">
-                <p class="no-items-message">Todoはありません。</p>
-                <p class="no-items-message">フォームから新しいタスクを追加してください。</p>
-            </div>
-        {{ end }}
     </div>
-    <script>
-        document.querySelectorAll('.todo-item').forEach(item => {
-            item.addEventListener('click', () => {
-            const id = item.dataset.id;  // data-id属性からIDを取得
-            window.location.href = `/todo/${id}`;
-            });
-        });
-    </script>
 </body>
 </html>
 {{ end }}
