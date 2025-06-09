@@ -17,28 +17,39 @@ func NewTodoHandler(uc usecases.TodoUsecase) TodoHandler {
 	return todoHandler
 }
 
-func (th *TodoHandler) SearchByID(c *gin.Context) {
-	n := c.Param("id")
-	id, err := strconv.ParseUint(n, 10, 64)
+func (th *TodoHandler) Index(c *gin.Context) {
+	todos, err := th.todoUsecase.Show()
 	if err != nil {
-		panic(err)
+		c.HTML(500, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.HTML(200, "todo/index.html", gin.H{
+		"todos":      todos,
+		"NotStarted": models.NotStarted,
+		"Done":       models.Done,
+	})
+}
+
+func (th *TodoHandler) ShowById(c *gin.Context) {
+	id_s := c.Param("id")
+	id, err := strconv.ParseUint(id_s, 10, 64)
+	if err != nil {
+		c.HTML(400, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
+		return
 	}
 	todo, err := th.todoUsecase.SearchByID(uint(id))
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(200, todo)
-}
-
-func (th *TodoHandler) Show(c *gin.Context) {
-	todos, err := th.todoUsecase.Show()
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.HTML(500, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 	c.HTML(200, "todo/show.html", gin.H{
-		"todos":      todos,
+		"todo":       todo,
 		"NotStarted": models.NotStarted,
 		"Done":       models.Done,
 	})
