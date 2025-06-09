@@ -12,6 +12,7 @@ func SetRouting(th TodoHandler) {
 	})
 	router.GET("/todo/:id", th.ShowById)
 	router.GET("/todo", th.Index)
+	router.POST("/todo", th.Create)
 	router.Run(":3000")
 
 }

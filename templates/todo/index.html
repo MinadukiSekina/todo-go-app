@@ -31,6 +31,64 @@
             display: flex;
             align-items: center;
         }
+        .todo-form {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+        }
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            transition: background-color 0.2s;
+            height: 40px;
+            box-sizing: border-box;
+        }
+        .btn-primary {
+            background-color: #2196f3;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1976d2;
+        }
         .todo-item {
             padding: 15px;
             border-bottom: 1px solid #eee;
@@ -58,22 +116,6 @@
             background-color: #fff3e0;
             color: #ef6c00;
         }
-        .add-button {
-            background-color: #2196f3;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            height: 40px;
-            box-sizing: border-box;
-        }
-        .add-button:hover {
-            background-color: #1976d2;
-        }
         .no-items {
             text-align: left;
             padding: 40px 20px;
@@ -88,7 +130,17 @@
     <div class="todo-list">
         <div class="header">
             <h1>Todo一覧</h1>
-            <a href="/todo/new" class="add-button">新しいTodoを追加</a>
+        </div>
+        <div class="todo-form">
+            <form method="post" action="/todo">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">新しいタスク</label>
+                        <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">追加</button>
+                </div>
+            </form>
         </div>
         {{ if gt (len .todos) 0 }}
             {{ range .todos }}
@@ -102,7 +154,7 @@
         {{ else }}
             <div class="no-items">
                 <p class="no-items-message">Todoはありません。</p>
-                <p class="no-items-message">「新しいTodoを追加」ボタンから登録してください。</p>
+                <p class="no-items-message">フォームから新しいタスクを追加してください。</p>
             </div>
         {{ end }}
     </div>
