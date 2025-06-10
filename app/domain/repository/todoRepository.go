@@ -10,5 +10,5 @@ type TodoRepository interface {
 	FindById(id uint) (*models.Todo, error)
 	Create(todo *models.Todo) error
 	Update(todo *models.Todo) error
-	Delete(todo *models.Todo) error
+	Delete(id uint) error
 }

@@ -98,6 +98,13 @@
         .btn-back:hover {
             background-color: #1976d2;
         }
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
         .todo-item {
             padding: 15px;
             border-bottom: 1px solid #eee;
@@ -153,7 +160,7 @@
             <a class="btn btn-back" href="/todo">一覧に戻る</a>
         </div>
         <div class="todo-form">
-            <form method="post" action="/todo/{{.todo.ID}}">
+            <form method="post">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="title">タスクのタイトル</label>
@@ -175,7 +182,10 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">更新</button>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button type="submit" class="btn btn-primary" formaction="/todo/{{.todo.ID}}">更新</button>
+                    <button type="submit" class="btn btn-danger" formaction="/todo/{{.todo.ID}}/delete" onclick="return confirm('このタスクを削除してもよろしいですか？')">削除</button>
+                </div>
             </form>
         </div>
     </div>

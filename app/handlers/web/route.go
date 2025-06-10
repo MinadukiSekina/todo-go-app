@@ -16,6 +16,7 @@ func SetRouting(th TodoHandler) {
 
 	router.GET("/todo/:id", th.ShowById)
 	router.POST("/todo/:id", th.Update)
+	router.POST("/todo/:id/delete", th.Delete)
 
 	router.Run(":3000")
 

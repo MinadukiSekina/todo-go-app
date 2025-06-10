@@ -36,7 +36,7 @@ func (tr *todoRepository) Update(todo *models.Todo) error {
 	return result.Error
 }
 
-func (tr *todoRepository) Delete(todo *models.Todo) error {
-	result := tr.GetConnection().Delete(todo)
+func (tr *todoRepository) Delete(id uint) error {
+	result := tr.GetConnection().Delete(&models.Todo{}, id)
 	return result.Error
 }

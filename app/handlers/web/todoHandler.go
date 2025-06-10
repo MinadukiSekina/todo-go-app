@@ -115,3 +115,24 @@ func (th *TodoHandler) Update(c *gin.Context) {
 	}
 	c.Redirect(http.StatusFound, "/todo/"+id_s)
 }
+
+func (th *TodoHandler) Delete(c *gin.Context) {
+	id_s := c.Param("id")
+	id, err := strconv.ParseUint(id_s, 10, 64)
+	if err != nil {
+		c.HTML(http.StatusBadRequest, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = th.todoUsecase.Delete(uint(id))
+
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.Redirect(http.StatusFound, "/todo")
+}

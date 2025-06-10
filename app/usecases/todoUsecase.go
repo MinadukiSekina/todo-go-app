@@ -10,7 +10,7 @@ type TodoUsecase interface {
 	Show() (todos *[]models.Todo, err error)
 	Add(todo *models.Todo) error
 	Edit(todo *models.Todo) error
-	Delete(todo *models.Todo) error
+	Delete(id uint) error
 }
 
 type todoUsecase struct {
@@ -42,7 +42,7 @@ func (uc *todoUsecase) Edit(todo *models.Todo) (err error) {
 	return
 }
 
-func (uc *todoUsecase) Delete(todo *models.Todo) (err error) {
-	err = uc.repos.Delete(todo)
+func (uc *todoUsecase) Delete(id uint) (err error) {
+	err = uc.repos.Delete(id)
 	return
 }
