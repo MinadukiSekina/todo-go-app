@@ -133,6 +133,17 @@
         .no-items-message {
             margin-bottom: 10px;
         }
+        .radio-group {
+            display: flex;
+            gap: 10px;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+        }
+        .radio-label input[type="radio"] {
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
@@ -147,6 +158,21 @@
                     <div class="form-group">
                         <label for="title">タスクのタイトル</label>
                         <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required value="{{.todo.Title}}" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>タスクの状態</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="status" value="notStarted" {{ if eq .todo.Status $.NotStarted }}checked{{end}}>
+                                未完了
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="status" value="completed" {{ if eq .todo.Status $.Done }}checked{{end}}>
+                                完了
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">更新</button>

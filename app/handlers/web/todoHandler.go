@@ -79,6 +79,20 @@ func (th *TodoHandler) Update(c *gin.Context) {
 		return
 	}
 	title := c.PostForm("title")
+	status_s := c.PostForm("status")
+
+	// 文字列のstatusをStatus型に変換
+	var correspond = map[string]models.Status{
+		"notStarted": models.NotStarted,
+		"completed":  models.Done,
+	}
+	status, err := models.StrToStatus(status_s, correspond)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
 
 	// 既存のTodoを取得
 	existingTodo, err := th.todoUsecase.SearchByID(uint(id))
@@ -91,6 +105,7 @@ func (th *TodoHandler) Update(c *gin.Context) {
 
 	// タイトルのみを更新
 	existingTodo.Title = title
+	existingTodo.Status = status
 	err = th.todoUsecase.Edit(existingTodo)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error/error.html", gin.H{
