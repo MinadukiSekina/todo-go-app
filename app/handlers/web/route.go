@@ -10,9 +10,13 @@ func SetRouting(th TodoHandler) {
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(200, "top/index.html", gin.H{"title": "Hello, World!"})
 	})
-	router.GET("/todo/:id", th.ShowById)
+
 	router.GET("/todo", th.Index)
 	router.POST("/todo", th.Create)
+
+	router.GET("/todo/:id", th.ShowById)
+	router.POST("/todo/:id", th.Update)
+
 	router.Run(":3000")
 
 }

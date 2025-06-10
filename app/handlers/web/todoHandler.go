@@ -68,3 +68,35 @@ func (th *TodoHandler) Create(c *gin.Context) {
 	}
 	c.Redirect(http.StatusFound, "/todo")
 }
+
+func (th *TodoHandler) Update(c *gin.Context) {
+	id_s := c.Param("id")
+	id, err := strconv.ParseUint(id_s, 10, 64)
+	if err != nil {
+		c.HTML(http.StatusBadRequest, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	title := c.PostForm("title")
+
+	// 既存のTodoを取得
+	existingTodo, err := th.todoUsecase.SearchByID(uint(id))
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// タイトルのみを更新
+	existingTodo.Title = title
+	err = th.todoUsecase.Edit(existingTodo)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error/error.html", gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	c.Redirect(http.StatusFound, "/todo/"+id_s)
+}
