@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/MinadukiSekina/todo-go-app/app/domain/models"
@@ -26,6 +27,12 @@ func (th *TodoHandler) Index(c *gin.Context) {
 		})
 		return
 	}
+
+	// Sort todos by status in ascending order
+	sort.Slice(*todos, func(i, j int) bool {
+		return (*todos)[i].Status < (*todos)[j].Status
+	})
+
 	c.HTML(http.StatusOK, "todo/index.html", gin.H{
 		"todos":      todos,
 		"NotStarted": models.NotStarted,
