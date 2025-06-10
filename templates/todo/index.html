@@ -133,6 +133,9 @@
             padding: 10px 20px;
             margin-bottom: 20px;
             border-radius: 4px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
         }
         .flash-success {
             background-color: #e8f5e9;
@@ -143,13 +146,13 @@
             background-color: #ffebee;
             color: #c62828;
             border: 1px solid #ffcdd2;
-            display: flex;
         }
         .flash-error::before {
             content: "⚠️";
             margin-right: 8px;
+            line-height: 1;
         }
-        .flash-error p {
+        .flash-message p {
             margin: 0;
             line-height: 1.5;
         }
