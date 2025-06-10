@@ -58,7 +58,7 @@ func (th *TodoHandler) ShowById(c *gin.Context) {
 
 func (th *TodoHandler) Create(c *gin.Context) {
 	title := c.PostForm("title")
-	todo := models.Todo{Title: title}
+	todo := models.Todo{Title: title, Status: models.NotStarted}
 	err := th.todoUsecase.Add(&todo)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error/error.html", gin.H{
