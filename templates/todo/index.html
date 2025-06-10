@@ -63,8 +63,9 @@
             display: flex;
             gap: 15px;
             align-items: flex-end;
+            margin-bottom: 15px;
         }
-        .form-row .form-group {
+        .form-group {
             flex: 1;
             margin-bottom: 0;
         }
@@ -141,8 +142,8 @@
                         <label for="title">新しいタスク</label>
                         <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">追加</button>
                 </div>
+                <button type="submit" class="btn btn-primary">追加</button>
             </form>
         </div>
         {{ if gt (len .todos) 0 }}

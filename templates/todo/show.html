@@ -63,8 +63,9 @@
             display: flex;
             gap: 15px;
             align-items: flex-end;
+            margin-bottom: 15px;
         }
-        .form-row .form-group {
+        .form-group {
             flex: 1;
             margin-bottom: 0;
         }
@@ -146,8 +147,8 @@
                         <label for="title">タスクのタイトル</label>
                         <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required value="{{.todo.Title}}">
                     </div>
-                    <button type="submit" class="btn btn-primary">更新</button>
                 </div>
+                <button type="submit" class="btn btn-primary">更新</button>
             </form>
         </div>
     </div>
