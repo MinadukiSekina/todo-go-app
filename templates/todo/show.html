@@ -1,0 +1,228 @@
+{{ define "todo/show.html" }}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo詳細</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .todo-list {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 40px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
+        .todo-form {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            transition: background-color 0.2s;
+            height: 40px;
+            box-sizing: border-box;
+        }
+        .btn-primary {
+            background-color: #2196f3;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1976d2;
+        }
+        .btn-back {
+            background-color: #2196f3;
+            color: white;
+        }
+        .btn-back:hover {
+            background-color: #1976d2;
+        }
+        .btn-danger {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        .todo-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .todo-item:last-child {
+            border-bottom: none;
+        }
+        .todo-title {
+            font-size: 1.1em;
+            color: #333;
+        }
+        .todo-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .status-completed {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-pending {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        .no-items {
+            text-align: left;
+            padding: 40px 20px;
+            color: #666;
+        }
+        .no-items-message {
+            margin-bottom: 10px;
+        }
+        .radio-group {
+            display: flex;
+            gap: 10px;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+        }
+        .radio-label input[type="radio"] {
+            margin-right: 5px;
+        }
+        .flash-message {
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+        }
+        .flash-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .flash-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .flash-error::before {
+            content: "⚠️";
+            margin-right: 8px;
+            line-height: 1;
+        }
+        .flash-message p {
+            margin: 0;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="todo-list">
+        <div class="header">
+            <h1>{{.todo.Title}}</h1>
+            <a class="btn btn-back" href="/todo">一覧に戻る</a>
+        </div>
+        {{if .Message}}
+        <div class="flash">
+            <div class="flash-message flash-{{.Type}}">
+                <p>{{.Message}}</p>
+            </div>
+        </div>
+        {{end}}
+        <div class="todo-form">
+            <form method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">タスクのタイトル</label>
+                        <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required value="{{.todo.Title}}" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>タスクの状態</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="status" value="notStarted" {{ if eq .todo.Status $.NotStarted }}checked{{end}}>
+                                未完了
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="status" value="completed" {{ if eq .todo.Status $.Done }}checked{{end}}>
+                                完了
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button type="submit" class="btn btn-primary" formaction="/todo/{{.todo.ID}}">更新</button>
+                    <button type="submit" class="btn btn-danger" formaction="/todo/{{.todo.ID}}/delete" onclick="return confirm('このタスクを削除してもよろしいですか？')">削除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+{{ end }}

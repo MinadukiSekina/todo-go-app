@@ -8,6 +8,8 @@ services:
         GID: ${GID:-20000}
     depends_on:
       - db
+    env_file:
+      - ./db/db.env
     tty: true
     volumes:
       - .:/app
@@ -18,11 +20,8 @@ services:
     build:
       context: ./db
       dockerfile: db.Dockerfile
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    env_file:
+      - ./db/db.env
     ports:
       - 3306:3306
     volumes:

@@ -1,15 +1,15 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/MinadukiSekina/todo-go-app/app/db"
+	handlers "github.com/MinadukiSekina/todo-go-app/app/handlers/web"
+	"github.com/MinadukiSekina/todo-go-app/app/injector"
+)
 
 func main() {
-	router := gin.Default()
 
-	router.LoadHTMLGlob("templates/*/*.html")
-
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(200, "top/index.html", gin.H{"title": "Hello, World!"})
-	})
-
-	router.Run(":3000")
+	// DBの初期化
+	db.Init()
+	todoHandler := injector.InjectTodoHandler()
+	handlers.SetRouting(todoHandler)
 }
