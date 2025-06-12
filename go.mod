@@ -4,7 +4,6 @@ go 1.24.3
 
 require (
 	github.com/gin-gonic/gin v1.10.1
-	github.com/go-playground/assert/v2 v2.2.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.5.2
 	gorm.io/driver/mysql v1.6.0
