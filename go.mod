@@ -4,6 +4,7 @@ go 1.24.3
 
 require (
 	github.com/gin-gonic/gin v1.10.1
+	go.uber.org/mock v0.5.2
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.30.0
 )
