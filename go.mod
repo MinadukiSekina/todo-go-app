@@ -3,6 +3,7 @@ module github.com/MinadukiSekina/todo-go-app
 go 1.24.3
 
 require (
+	github.com/DATA-DOG/go-txdb v0.2.1
 	github.com/gin-gonic/gin v1.10.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.5.2
@@ -12,7 +13,6 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/DATA-DOG/go-txdb v0.2.1 // indirect
 	github.com/bytedance/sonic v1.13.3 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
