@@ -9,7 +9,7 @@ import (
 
 func InjectDB() db.SqlHandler {
 	sqlhandler := db.GetSqlHandler()
-	return *sqlhandler
+	return sqlhandler
 }
 
 /*

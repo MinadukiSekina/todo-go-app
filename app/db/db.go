@@ -59,7 +59,7 @@ func Init() {
 	}
 }
 
-func GetSqlHandler() *SqlHandler {
+func GetSqlHandler() *sqlHandler {
 	if handler == nil || !handler.initialized {
 		Init()
 	}
