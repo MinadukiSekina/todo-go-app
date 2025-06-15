@@ -359,3 +359,71 @@ func (s *todoRepositoryTestSuite) TestUpdate() {
 		})
 	}
 }
+
+func (s *todoRepositoryTestSuite) TestDelete() {
+	// 更新前のデータ
+	todo1 := models.Todo{Title: "test1", Status: models.NotStarted}
+	// 存在しないデータを更新するケース用
+	notExistTodo := models.Todo{Title: "not_exist_record", Status: models.NotStarted}
+
+	cases := map[string]struct {
+		todo      *models.Todo
+		expectErr bool
+		err       error
+		setup     func(*gorm.DB)
+	}{
+		"正常ケース:削除成功": {
+			todo:      &todo1,
+			expectErr: false,
+			err:       errors.New("record not found"),
+			setup:     func(d *gorm.DB) { _ = d.Create(&todo1) },
+		},
+		"異常ケース:存在しないIDの削除": {
+			todo:      &notExistTodo,
+			expectErr: true,
+			err:       errors.New("record not found"),
+			setup:     func(d *gorm.DB) {}, // 何もしない
+		},
+	}
+
+	for name, tt := range cases {
+		s.T().Run(name, func(t *testing.T) {
+			// テスト用DBに接続する
+			db, err := gorm.Open(mysql.New(mysql.Config{DSN: uuid.NewString(), DriverName: "txdb"}))
+			if err != nil {
+				s.Failf("database connection is not established", "%v", err)
+			}
+			// コネクションを格納する
+			s.dbConn = db
+
+			defer s.Close()
+
+			// セットアップ関数を実行する
+			tt.setup(s.dbConn)
+
+			// 初期処理
+			sqlHandler := testHandler{conn: s.dbConn}
+			todoRepository := NewTodoRepository(&sqlHandler)
+
+			// 削除処理を実行する
+			err = todoRepository.Delete(tt.todo.ID)
+
+			// 結果を確認する（異常系）
+			if tt.expectErr {
+				if assert.Error(t, err) {
+					assert.Equal(t, tt.err, err)
+				}
+				return
+			}
+
+			// 結果を確認する（正常系）
+			if assert.NoError(t, err) {
+				todo, err := todoRepository.FindById(tt.todo.ID)
+				assert.Nil(t, todo)
+				if assert.Error(t, err) {
+					assert.Equal(t, errors.New("record not found"), err)
+				}
+			}
+		})
+	}
+}

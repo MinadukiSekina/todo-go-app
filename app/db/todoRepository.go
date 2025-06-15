@@ -46,6 +46,11 @@ func (tr *todoRepository) Update(todo *models.Todo) error {
 }
 
 func (tr *todoRepository) Delete(id uint) error {
+	// 存在しないIDの場合でもエラーは出ないようなので、存否チェックをする
+	_, err := tr.FindById(id)
+	if err != nil {
+		return err
+	}
 	result := tr.handler.GetConnection().Delete(&models.Todo{}, id)
 	return result.Error
 }
