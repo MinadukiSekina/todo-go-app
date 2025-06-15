@@ -23,7 +23,10 @@ func (tr *todoRepository) FindAll() (*[]models.Todo, error) {
 func (tr *todoRepository) FindById(id uint) (*models.Todo, error) {
 	var todo models.Todo
 	result := tr.handler.GetConnection().Where("id = ?", id).First(&todo)
-	return &todo, result.Error
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &todo, nil
 }
 
 func (tr *todoRepository) Create(todo *models.Todo) error {

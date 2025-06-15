@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -149,6 +150,67 @@ func (s *todoRepositoryTestSuite) TestFindAll() {
 			} else {
 				if assert.NoError(t, err) {
 					assert.ElementsMatch(t, *tt.want, *todos)
+				}
+			}
+		})
+	}
+}
+
+func (s *todoRepositoryTestSuite) TestFindById() {
+
+	todo1 := models.Todo{Title: "test1", Status: models.NotStarted}
+	todo2 := models.Todo{Title: "test1", Status: models.NotStarted}
+	todo2.ID = 1
+
+	cases := map[string]struct {
+		want      *models.Todo
+		expectErr bool
+		err       error
+		setup     func(*gorm.DB)
+	}{
+		"正常ケース:指定したIDのデータあり": {
+			want:      &todo1,
+			expectErr: false,
+			err:       nil,
+			setup:     func(d *gorm.DB) { _ = d.Create(&todo1) },
+		},
+		"異常ケース:指定したIDのデータが無い": {
+			want:      &todo2,
+			expectErr: true,
+			err:       errors.New("record not found"),
+			setup:     func(d *gorm.DB) {},
+		},
+	}
+	for name, tt := range cases {
+		s.T().Run(name, func(t *testing.T) {
+			// テスト用DBに接続する
+			db, err := gorm.Open(mysql.New(mysql.Config{DSN: uuid.NewString(), DriverName: "txdb"}))
+			if err != nil {
+				s.Failf("database connection is not established", "%v", err)
+			}
+			// コネクションを格納する
+			s.dbConn = db
+
+			defer s.Close()
+
+			// セットアップ関数を実行する
+			tt.setup(s.dbConn)
+
+			// 初期処理
+			sqlHandler := testHandler{conn: s.dbConn}
+			todoRepository := NewTodoRepository(&sqlHandler)
+
+			todo, err := todoRepository.FindById(tt.want.ID)
+
+			// 結果を確認
+			if tt.expectErr {
+				if assert.Error(t, err) {
+					assert.Equal(t, tt.err, err)
+				}
+				assert.Nil(t, todo)
+			} else {
+				if assert.NoError(t, err) {
+					assert.Equal(t, *tt.want, *todo)
 				}
 			}
 		})
