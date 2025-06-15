@@ -113,8 +113,7 @@ func (s *todoRepositoryTestSuite) TestFindAll() {
 	}
 	for name, tt := range cases {
 		s.T().Run(name, func(t *testing.T) {
-
-			// テスト用DBに接続する。DSNは適当な文字列を渡しているが、txdbが勝手に接続を開いてくれる
+			// テスト用DBに接続する
 			db, err := gorm.Open(mysql.New(mysql.Config{DSN: uuid.NewString(), DriverName: "txdb"}))
 			if err != nil {
 				s.Failf("database connection is not established", "%v", err)
@@ -142,13 +141,15 @@ func (s *todoRepositoryTestSuite) TestFindAll() {
 			todos, err := todoRepository.FindAll()
 
 			// 結果を確認
-			assert.ElementsMatch(t, *tt.want, *todos)
-
-			// エラーの確認
 			if tt.expectErr {
-				assert.Equal(t, tt.err.Error(), err.Error())
+				if assert.Error(t, err) {
+					assert.Equal(t, tt.err, err)
+				}
+				assert.Nil(t, todos)
 			} else {
-				assert.NoError(t, err)
+				if assert.NoError(t, err) {
+					assert.ElementsMatch(t, *tt.want, *todos)
+				}
 			}
 		})
 	}
