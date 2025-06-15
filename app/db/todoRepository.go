@@ -35,6 +35,12 @@ func (tr *todoRepository) Create(todo *models.Todo) error {
 }
 
 func (tr *todoRepository) Update(todo *models.Todo) error {
+	// Saveメソッドだと、存在しないIDの場合はCreate動作になるため、
+	// 存否チェックをする
+	_, err := tr.FindById(todo.ID)
+	if err != nil {
+		return err
+	}
 	result := tr.handler.GetConnection().Save(todo)
 	return result.Error
 }

@@ -267,3 +267,95 @@ func (s *todoRepositoryTestSuite) TestCreate() {
 		})
 	}
 }
+
+func (s *todoRepositoryTestSuite) TestUpdate() {
+	// 更新前のデータ
+	todo1 := models.Todo{Title: "test1", Status: models.NotStarted}
+	// 存在しないデータを更新するケース用
+	notExistTodo := models.Todo{Title: "not_exist_record", Status: models.NotStarted}
+
+	cases := map[string]struct {
+		before    *models.Todo
+		update    func(*models.Todo) // 更新するフィールドを指定する関数
+		expectErr bool
+		err       error
+		setup     func(*gorm.DB)
+	}{
+		"正常ケース:更新成功": {
+			before: &todo1,
+			update: func(t *models.Todo) {
+				t.Title = "test1_updated"
+				t.Status = models.Done
+			},
+			expectErr: false,
+			err:       nil,
+			setup:     func(d *gorm.DB) { _ = d.Create(&todo1) },
+		},
+		"異常ケース:存在しないIDの更新": {
+			before: &notExistTodo,
+			update: func(t *models.Todo) {
+				t.Title = "not_exist_updated"
+				t.Status = models.Done
+			},
+			expectErr: true,
+			err:       errors.New("record not found"),
+			setup:     func(d *gorm.DB) {}, // 何もしない
+		},
+	}
+
+	for name, tt := range cases {
+		s.T().Run(name, func(t *testing.T) {
+			// テスト用DBに接続する
+			db, err := gorm.Open(mysql.New(mysql.Config{DSN: uuid.NewString(), DriverName: "txdb"}))
+			if err != nil {
+				s.Failf("database connection is not established", "%v", err)
+			}
+			// コネクションを格納する
+			s.dbConn = db
+
+			defer s.Close()
+
+			// セットアップ関数を実行する
+			tt.setup(s.dbConn)
+
+			// 初期処理
+			sqlHandler := testHandler{conn: s.dbConn}
+			todoRepository := NewTodoRepository(&sqlHandler)
+
+			// 更新対象のレコードを取得
+			todo, err := todoRepository.FindById(tt.before.ID)
+
+			// 存在しないIDの場合は、直接Updateを実行する
+			if tt.expectErr {
+				if assert.Error(t, err) {
+					assert.Equal(t, tt.err, err)
+				}
+				// 存在しないIDのレコードを直接更新
+				tt.update(tt.before)
+				err = todoRepository.Update(tt.before)
+				if assert.Error(t, err) {
+					assert.Equal(t, tt.err, err)
+				}
+				return
+			}
+
+			if assert.NoError(t, err) {
+				// 更新するフィールドを設定
+				tt.update(todo)
+
+				// 更新処理を実行
+				err = todoRepository.Update(todo)
+
+				// 結果を確認
+				if assert.NoError(t, err) {
+					// 更新後のデータを取得して確認
+					updated, err := todoRepository.FindById(todo.ID)
+					if assert.NoError(t, err) {
+						assert.Equal(t, todo.Title, updated.Title)
+						assert.Equal(t, todo.Status, updated.Status)
+					}
+				}
+			}
+		})
+	}
+}
