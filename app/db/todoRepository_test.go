@@ -216,3 +216,54 @@ func (s *todoRepositoryTestSuite) TestFindById() {
 		})
 	}
 }
+
+func (s *todoRepositoryTestSuite) TestCreate() {
+
+	todo1 := models.Todo{Title: "test1", Status: models.NotStarted}
+
+	cases := map[string]struct {
+		want      *models.Todo
+		expectErr bool
+		err       error
+	}{
+		"正常ケース:作成に成功": {
+			want:      &todo1,
+			expectErr: false,
+			err:       nil,
+		},
+	}
+	for name, tt := range cases {
+		s.T().Run(name, func(t *testing.T) {
+			// テスト用DBに接続する
+			db, err := gorm.Open(mysql.New(mysql.Config{DSN: uuid.NewString(), DriverName: "txdb"}))
+			if err != nil {
+				s.Failf("database connection is not established", "%v", err)
+			}
+			// コネクションを格納する
+			s.dbConn = db
+
+			defer s.Close()
+
+			// 初期処理
+			sqlHandler := testHandler{conn: s.dbConn}
+			todoRepository := NewTodoRepository(&sqlHandler)
+
+			err = todoRepository.Create(tt.want)
+
+			// 結果を確認
+			if tt.expectErr {
+				if assert.Error(t, err) {
+					assert.Equal(t, tt.err, err)
+				}
+			} else {
+				if assert.NoError(t, err) {
+					todo, err := todoRepository.FindById(tt.want.ID)
+					if err != nil {
+						s.Failf("can't get todo. error: %v", err.Error())
+					}
+					assert.Equal(t, *tt.want, *todo)
+				}
+			}
+		})
+	}
+}
