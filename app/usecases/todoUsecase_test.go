@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/MinadukiSekina/todo-go-app/app/domain/models"
-	mock_repository "github.com/MinadukiSekina/todo-go-app/app/mock"
+	mock_repository "github.com/MinadukiSekina/todo-go-app/app/mock/repository"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
