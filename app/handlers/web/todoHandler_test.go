@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -82,6 +83,84 @@ func TestIndex(t *testing.T) {
 			// mockを利用してテストする
 			handler := NewTodoHandler(mock)
 			handler.Index(c)
+
+			// 結果を確認
+			assert.Equal(t, tt.want, w.Code)
+		})
+	}
+}
+
+func TestShowByID(t *testing.T) {
+
+	gin.SetMode(gin.TestMode)
+
+	// テスト用の引数を格納する
+	type args struct {
+		id any
+	}
+
+	todo1 := models.Todo{Title: "test1", Status: models.NotStarted}
+	todo1.ID = 1
+
+	cases := map[string]struct {
+		prepareMockFn func(m *mock_usecases.MockTodoUsecase)
+		args          args
+		want          int
+		expectErr     bool
+		err           error
+	}{
+		"正常ケース:データあり": {
+			prepareMockFn: func(m *mock_usecases.MockTodoUsecase) { m.EXPECT().SearchByID(uint(1)).Return(&todo1, nil) },
+			args:          args{id: 1},
+			want:          http.StatusOK,
+			expectErr:     false,
+			err:           nil,
+		},
+		"異常ケース:IDを数値に変換できない": {
+			prepareMockFn: func(m *mock_usecases.MockTodoUsecase) {
+				// IDが数値に変換できない場合はSearchByIDは呼ばれない
+			},
+			args:      args{id: "string"},
+			want:      http.StatusSeeOther,
+			expectErr: true,
+			err:       nil,
+		},
+		"異常ケース:データなし": {
+			prepareMockFn: func(m *mock_usecases.MockTodoUsecase) {
+				m.EXPECT().SearchByID(uint(1)).Return(nil, errors.New("record not found"))
+			},
+			args:      args{id: 1},
+			want:      http.StatusSeeOther,
+			expectErr: true,
+			err:       nil,
+		},
+	}
+	for name, tt := range cases {
+		t.Run(name, func(t *testing.T) {
+			// モックの呼び出しを管理するControllerを生成
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// モックの生成
+			mock := mock_usecases.NewMockTodoUsecase(mockCtrl)
+			// テスト中に呼ばれるべき関数と帰り値を指定
+			tt.prepareMockFn(mock)
+
+			// gin contextの生成
+			w := httptest.NewRecorder()
+			c, r := gin.CreateTestContext(w)
+			// テンプレートの読み込み
+			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
+			r.LoadHTMLGlob("/app/templates/*/*.html")
+			// リクエストを設定
+			req, _ := http.NewRequest("GET", fmt.Sprintf("/todo/%v", tt.args.id), nil)
+			c.Request = req
+			// パラメータを設定
+			c.Params = []gin.Param{{Key: "id", Value: fmt.Sprint(tt.args.id)}}
+
+			// mockを利用してテストする
+			handler := NewTodoHandler(mock)
+			handler.ShowById(c)
 
 			// 結果を確認
 			assert.Equal(t, tt.want, w.Code)
