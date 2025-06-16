@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/MinadukiSekina/todo-go-app/app/domain/models"
@@ -73,9 +75,11 @@ func TestIndex(t *testing.T) {
 			// gin contextの生成
 			w := httptest.NewRecorder()
 			c, r := gin.CreateTestContext(w)
+
 			// テンプレートの読み込み
 			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
 			r.LoadHTMLGlob("/app/templates/*/*.html")
+
 			// リクエストを設定
 			req, _ := http.NewRequest("GET", "/todo", nil)
 			c.Request = req
@@ -149,18 +153,96 @@ func TestShowByID(t *testing.T) {
 			// gin contextの生成
 			w := httptest.NewRecorder()
 			c, r := gin.CreateTestContext(w)
+
 			// テンプレートの読み込み
 			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
 			r.LoadHTMLGlob("/app/templates/*/*.html")
+
 			// リクエストを設定
 			req, _ := http.NewRequest("GET", fmt.Sprintf("/todo/%v", tt.args.id), nil)
 			c.Request = req
+
 			// パラメータを設定
 			c.Params = []gin.Param{{Key: "id", Value: fmt.Sprint(tt.args.id)}}
 
 			// mockを利用してテストする
 			handler := NewTodoHandler(mock)
 			handler.ShowById(c)
+
+			// 結果を確認
+			assert.Equal(t, tt.want, w.Code)
+		})
+	}
+}
+
+func TestCreate(t *testing.T) {
+
+	gin.SetMode(gin.TestMode)
+
+	// テスト用の引数を格納する
+	type args struct {
+		title string
+	}
+
+	cases := map[string]struct {
+		prepareMockFn func(m *mock_usecases.MockTodoUsecase)
+		args          args
+		want          int
+		expectErr     bool
+		err           error
+	}{
+		"正常ケース:作成に成功": {
+			prepareMockFn: func(m *mock_usecases.MockTodoUsecase) { m.EXPECT().Add(gomock.Any()).Return(nil) },
+			args:          args{title: "test1"},
+			want:          http.StatusFound,
+			expectErr:     false,
+			err:           nil,
+		},
+		"異常ケース:作成に失敗": {
+			prepareMockFn: func(m *mock_usecases.MockTodoUsecase) {
+				m.EXPECT().Add(gomock.Any()).Return(errors.New("create todo is failed"))
+			},
+			args:      args{title: "failed"},
+			want:      http.StatusSeeOther,
+			expectErr: true,
+			err:       nil,
+		},
+	}
+	for name, tt := range cases {
+		t.Run(name, func(t *testing.T) {
+			// モックの呼び出しを管理するControllerを生成
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// モックの生成
+			mock := mock_usecases.NewMockTodoUsecase(mockCtrl)
+			// テスト中に呼ばれるべき関数と帰り値を指定
+			tt.prepareMockFn(mock)
+
+			// gin contextの生成
+			w := httptest.NewRecorder()
+			c, r := gin.CreateTestContext(w)
+			// テンプレートの読み込み
+			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
+			r.LoadHTMLGlob("/app/templates/*/*.html")
+
+			// フォームデータの組み立て
+			formData := url.Values{}
+			formData.Add("title", tt.args.title)
+
+			// リクエストを設定
+			req, _ := http.NewRequest("POST", "/todo", strings.NewReader(formData.Encode()))
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			c.Request = req
+
+			// mockを利用してテストする
+			handler := NewTodoHandler(mock)
+			handler.Create(c)
+
+			// GETの場合と異なり、POSTの場合はリダイレクトのステータスコードが書き込まれないらしい
+			// 回避策として、c.Redirectの後に明示的に書き込むようにする（Create内部でc.Redirectを呼んでいる）
+			// ref: https://stackoverflow.com/questions/76319196/unit-testing-of-gins-context-redirect-works-for-get-response-code-but-fails-for
+			c.Writer.WriteHeaderNow()
 
 			// 結果を確認
 			assert.Equal(t, tt.want, w.Code)
