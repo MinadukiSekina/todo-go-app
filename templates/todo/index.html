@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todo一覧</title>
     <link href="css/style.css" rel="stylesheet">
+    <script src="/js/todoItemClick.js" defer></script>
 </head>
 <body>
     <div class="todo-list">
@@ -46,14 +47,6 @@
             </div>
         {{ end }}
     </div>
-    <script>
-        document.querySelectorAll('.todo-item').forEach(item => {
-            item.addEventListener('click', () => {
-            const id = item.dataset.id;  // data-id属性からIDを取得
-            window.location.href = `/todo/${id}`;
-            });
-        });
-    </script>
 </body>
 </html>
 {{ end }}

@@ -10,6 +10,7 @@ func SetRouting() {
 
 	router.LoadHTMLGlob("templates/*/*.html")
 	router.Static("/css", "app/static/css/")
+	router.Static("/js", "app/static/js/")
 
 	th := injector.InjectTodoHandler()
 	mh := injector.InjectMainHandler()
