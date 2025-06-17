@@ -28,3 +28,7 @@ func InjectTodoUsecase() usecases.TodoUsecase {
 func InjectTodoHandler() handlers.TodoHandler {
 	return handlers.NewTodoHandler(InjectTodoUsecase())
 }
+
+func InjectMainHandler() handlers.MainHandler {
+	return handlers.NewMainHandler()
+}

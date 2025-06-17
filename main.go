@@ -1,15 +1,10 @@
 package main
 
 import (
-	"github.com/MinadukiSekina/todo-go-app/app/db"
-	handlers "github.com/MinadukiSekina/todo-go-app/app/handlers/web"
-	"github.com/MinadukiSekina/todo-go-app/app/injector"
+	"github.com/MinadukiSekina/todo-go-app/app/handlers/web/route"
 )
 
 func main() {
-
-	// DBの初期化
-	db.Init()
-	todoHandler := injector.InjectTodoHandler()
-	handlers.SetRouting(todoHandler)
+	// ルーティングの設定
+	route.SetRouting()
 }
