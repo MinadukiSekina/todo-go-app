@@ -8,7 +8,7 @@ import (
 func SetRouting() {
 	router := gin.Default()
 
-	router.LoadHTMLGlob("templates/*/*.html")
+	router.LoadHTMLGlob("app/templates/*/*.html")
 	router.Static("/css", "app/static/css/")
 	router.Static("/js", "app/static/js/")
 
