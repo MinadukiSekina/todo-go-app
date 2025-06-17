@@ -9,6 +9,7 @@ func SetRouting() {
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*/*.html")
+	router.Static("/css", "app/static/css/")
 
 	th := injector.InjectTodoHandler()
 	mh := injector.InjectMainHandler()
