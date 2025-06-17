@@ -10,15 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// todoパスへのリクエストに対するハンドラーの構造体
 type TodoHandler struct {
 	todoUsecase usecases.TodoUsecase
 }
 
+// TodoHandlerの新しいインスタンスを作成して返す
 func NewTodoHandler(uc usecases.TodoUsecase) TodoHandler {
 	todoHandler := TodoHandler{todoUsecase: uc}
 	return todoHandler
 }
 
+// todoの一覧を表示する
 func (th *TodoHandler) Index(c *gin.Context) {
 	todos, err := th.todoUsecase.Show()
 	if err != nil {
@@ -45,6 +48,7 @@ func (th *TodoHandler) Index(c *gin.Context) {
 	})
 }
 
+// 指定されたIDのtodoを表示する
 func (th *TodoHandler) ShowById(c *gin.Context) {
 	id_s := c.Param("id")
 	id, err := strconv.ParseUint(id_s, 10, 64)
@@ -72,6 +76,7 @@ func (th *TodoHandler) ShowById(c *gin.Context) {
 	})
 }
 
+// todoを新規作成する
 func (th *TodoHandler) Create(c *gin.Context) {
 	title := c.PostForm("title")
 	todo := models.Todo{Title: title, Status: models.NotStarted}
@@ -128,6 +133,7 @@ func (th *TodoHandler) Update(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/todo/"+id_s)
 }
 
+// todoを削除する
 func (th *TodoHandler) Delete(c *gin.Context) {
 	id_s := c.Param("id")
 	id, err := strconv.ParseUint(id_s, 10, 64)

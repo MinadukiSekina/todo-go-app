@@ -1,0 +1,55 @@
+{{ define "todo/show.html" }}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo詳細</title>
+    <link href="../css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="todo-list">
+        <div class="header">
+            <h1>{{.todo.Title}}</h1>
+            <a class="btn btn-back" href="/todo">一覧に戻る</a>
+        </div>
+        {{if .Message}}
+        <div class="flash">
+            <div class="flash-message flash-{{.Type}}">
+                <p>{{.Message}}</p>
+            </div>
+        </div>
+        {{end}}
+        <div class="todo-form">
+            <form method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">タスクのタイトル</label>
+                        <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required value="{{.todo.Title}}" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>タスクの状態</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="status" value="notStarted" {{ if eq .todo.Status $.NotStarted }}checked{{end}}>
+                                未完了
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="status" value="completed" {{ if eq .todo.Status $.Done }}checked{{end}}>
+                                完了
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button type="submit" class="btn btn-primary" formaction="/todo/{{.todo.ID}}">更新</button>
+                    <button type="submit" class="btn btn-danger" formaction="/todo/{{.todo.ID}}/delete" onclick="return confirm('このタスクを削除してもよろしいですか？')">削除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+{{ end }}

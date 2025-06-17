@@ -5,14 +5,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ルーティングやミドルウェアの設定を行う
 func SetRouting() {
 	router := gin.Default()
 
-	router.LoadHTMLGlob("templates/*/*.html")
+	// HTML・css・jsファイルの読み込み
+	router.LoadHTMLGlob("app/templates/*/*.html")
+	router.Static("/css", "app/static/css/")
+	router.Static("/js", "app/static/js/")
 
+	// 各ハンドラーの初期化
 	th := injector.InjectTodoHandler()
 	mh := injector.InjectMainHandler()
 
+	// ルーティングの設定
 	router.GET("/", mh.Index)
 
 	router.GET("/todo", th.Index)
@@ -22,5 +28,6 @@ func SetRouting() {
 	router.POST("/todo/:id", th.Update)
 	router.POST("/todo/:id/delete", th.Delete)
 
+	// 待機開始
 	router.Run(":3000")
 }

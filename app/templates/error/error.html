@@ -1,0 +1,23 @@
+{{ define "error/error.html" }}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo一覧</title>
+    <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="todo-list">
+        <div class="header">
+            <h1>エラーが発生しました。</h1>
+            <a href="/todo" class="btn goto-top-button">トップに戻る</a>
+        </div>
+        <div class="error-detail">
+            <p class="error-message">申し訳ありません。エラーが発生しました。</p>
+            <p class="error-message">{{.message}}</p>
+        </div>
+    </div>
+</body>
+</html>
+{{ end }}

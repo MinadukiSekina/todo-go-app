@@ -1,0 +1,52 @@
+{{ define "todo/index.html" }}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo一覧</title>
+    <link href="css/style.css" rel="stylesheet">
+    <script src="/js/todoItemClick.js" defer></script>
+</head>
+<body>
+    <div class="todo-list">
+        <div class="header">
+            <h1>Todo一覧</h1>
+        </div>
+        {{if .Message}}
+        <div class="flash">
+            <div class="flash-message flash-{{.Type}}">
+                <p>{{.Message}}</p>
+            </div>
+        </div>
+        {{end}}
+        <div class="todo-form">
+            <form method="post" action="/todo">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">新しいタスク</label>
+                        <input type="text" id="title" name="title" class="form-control" placeholder="タスクのタイトルを入力してください" required />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">追加</button>
+            </form>
+        </div>
+        {{ if gt (len .todos) 0 }}
+            {{ range .todos }}
+            <div class="todo-item" data-id="{{.ID}}">
+                <span class="todo-title">{{ .Title }}</span>
+                <span class="todo-status {{ if eq .Status $.NotStarted }}status-pending{{ else }}status-completed{{ end }}">
+                    {{ if eq .Status $.NotStarted }}未完了{{ else }}完了{{ end }}
+                </span>
+            </div>
+            {{ end }}
+        {{ else }}
+            <div class="no-items">
+                <p class="no-items-message">Todoはありません。</p>
+                <p class="no-items-message">フォームから新しいタスクを追加してください。</p>
+            </div>
+        {{ end }}
+    </div>
+</body>
+</html>
+{{ end }}
