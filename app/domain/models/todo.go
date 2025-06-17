@@ -18,6 +18,7 @@ const (
 	Done
 )
 
+// todoのデータを保持する構造体
 type Todo struct {
 	gorm.Model
 	Title  string

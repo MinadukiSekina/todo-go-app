@@ -9,15 +9,19 @@ import (
 	"gorm.io/gorm"
 )
 
+// データベース接続を管理するインターフェース
 type SqlHandler interface {
 	GetConnection() *gorm.DB
 }
 
+// データベース接続の実装を保持する構造体
 type sqlHandler struct {
 	conn        *gorm.DB
 	initialized bool
 }
 
+// データベース接続を取得する
+// 接続が初期化されていない場合は初期化を行う
 func (handler *sqlHandler) GetConnection() *gorm.DB {
 	if handler == nil || !handler.initialized {
 		Init()
@@ -25,8 +29,12 @@ func (handler *sqlHandler) GetConnection() *gorm.DB {
 	return handler.conn
 }
 
+// シングルトンインスタンスを保持するグローバル変数
 var handler *sqlHandler
 
+// データベース接続を初期化する
+// 環境変数から接続情報を取得し、GORMを使用して接続を確立する
+// 接続後、Todoモデルのマイグレーションを実行する
 func Init() {
 	if handler != nil && handler.initialized {
 		return
@@ -59,6 +67,8 @@ func Init() {
 	}
 }
 
+// SqlHandlerのインスタンスを取得する
+// インスタンスが存在しない場合は初期化を行う
 func GetSqlHandler() *sqlHandler {
 	if handler == nil || !handler.initialized {
 		Init()
