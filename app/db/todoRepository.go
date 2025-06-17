@@ -6,37 +6,51 @@ import (
 )
 
 type todoRepository struct {
-	SqlHandler
+	handler SqlHandler
 }
 
 func NewTodoRepository(sqlHandler SqlHandler) repository.TodoRepository {
-	todoRepository := todoRepository{SqlHandler: sqlHandler}
+	todoRepository := todoRepository{handler: sqlHandler}
 	return &todoRepository
 }
 
 func (tr *todoRepository) FindAll() (*[]models.Todo, error) {
 	var todos []models.Todo
-	result := tr.GetConnection().Find(&todos)
+	result := tr.handler.GetConnection().Find(&todos)
 	return &todos, result.Error
 }
 
 func (tr *todoRepository) FindById(id uint) (*models.Todo, error) {
 	var todo models.Todo
-	result := tr.GetConnection().Where("id = ?", id).First(&todo)
-	return &todo, result.Error
+	result := tr.handler.GetConnection().Where("id = ?", id).First(&todo)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &todo, nil
 }
 
 func (tr *todoRepository) Create(todo *models.Todo) error {
-	result := tr.GetConnection().Create(todo)
+	result := tr.handler.GetConnection().Create(todo)
 	return result.Error
 }
 
 func (tr *todoRepository) Update(todo *models.Todo) error {
-	result := tr.GetConnection().Save(todo)
+	// Saveメソッドだと、存在しないIDの場合はCreate動作になるため、
+	// 存否チェックをする
+	_, err := tr.FindById(todo.ID)
+	if err != nil {
+		return err
+	}
+	result := tr.handler.GetConnection().Save(todo)
 	return result.Error
 }
 
 func (tr *todoRepository) Delete(id uint) error {
-	result := tr.GetConnection().Delete(&models.Todo{}, id)
+	// 存在しないIDの場合でもエラーは出ないようなので、存否チェックをする
+	_, err := tr.FindById(id)
+	if err != nil {
+		return err
+	}
+	result := tr.handler.GetConnection().Delete(&models.Todo{}, id)
 	return result.Error
 }

@@ -9,7 +9,7 @@ import (
 
 func InjectDB() db.SqlHandler {
 	sqlhandler := db.GetSqlHandler()
-	return *sqlhandler
+	return sqlhandler
 }
 
 /*
@@ -27,4 +27,8 @@ func InjectTodoUsecase() usecases.TodoUsecase {
 
 func InjectTodoHandler() handlers.TodoHandler {
 	return handlers.NewTodoHandler(InjectTodoUsecase())
+}
+
+func InjectMainHandler() handlers.MainHandler {
+	return handlers.NewMainHandler()
 }

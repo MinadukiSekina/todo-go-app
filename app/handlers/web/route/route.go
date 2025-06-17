@@ -1,15 +1,19 @@
-package handlers
+package route
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/MinadukiSekina/todo-go-app/app/injector"
+	"github.com/gin-gonic/gin"
+)
 
-func SetRouting(th TodoHandler) {
+func SetRouting() {
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*/*.html")
 
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(200, "top/index.html", gin.H{"title": "Hello, World!"})
-	})
+	th := injector.InjectTodoHandler()
+	mh := injector.InjectMainHandler()
+
+	router.GET("/", mh.Index)
 
 	router.GET("/todo", th.Index)
 	router.POST("/todo", th.Create)
@@ -19,5 +23,4 @@ func SetRouting(th TodoHandler) {
 	router.POST("/todo/:id/delete", th.Delete)
 
 	router.Run(":3000")
-
 }

@@ -49,13 +49,13 @@ func (th *TodoHandler) ShowById(c *gin.Context) {
 	id_s := c.Param("id")
 	id, err := strconv.ParseUint(id_s, 10, 64)
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "このタスクは閲覧できません。")
+		SetFlashMessage(c, resultIsError, "このタスクは閲覧できません。")
 		c.Redirect(http.StatusSeeOther, "/todo")
 		return
 	}
 	todo, err := th.todoUsecase.SearchByID(uint(id))
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "該当するタスクが見つかりませんでした。")
+		SetFlashMessage(c, resultIsError, "該当するタスクが見つかりませんでした。")
 		c.Redirect(http.StatusSeeOther, "/todo")
 		return
 	}
@@ -77,7 +77,7 @@ func (th *TodoHandler) Create(c *gin.Context) {
 	todo := models.Todo{Title: title, Status: models.NotStarted}
 	err := th.todoUsecase.Add(&todo)
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "新しいタスクの作成に失敗しました。")
+		SetFlashMessage(c, resultIsError, "新しいタスクの作成に失敗しました。")
 		c.Redirect(http.StatusSeeOther, "/todo")
 		return
 	}
@@ -89,7 +89,7 @@ func (th *TodoHandler) Update(c *gin.Context) {
 	id_s := c.Param("id")
 	id, err := strconv.ParseUint(id_s, 10, 64)
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "このタスクは更新できません。")
+		SetFlashMessage(c, resultIsError, "このタスクは更新できません。")
 		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
 		return
 	}
@@ -103,7 +103,7 @@ func (th *TodoHandler) Update(c *gin.Context) {
 	}
 	status, err := models.StrToStatus(status_s, correspond)
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "タスクの状態が不正な値です。")
+		SetFlashMessage(c, resultIsError, "タスクの状態が不正な値です。")
 		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
 		return
 	}
@@ -111,7 +111,7 @@ func (th *TodoHandler) Update(c *gin.Context) {
 	// 既存のTodoを取得
 	existingTodo, err := th.todoUsecase.SearchByID(uint(id))
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "対象となるタスクが存在しません。")
+		SetFlashMessage(c, resultIsError, "対象となるタスクが存在しません。")
 		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
 		return
 	}
@@ -120,7 +120,7 @@ func (th *TodoHandler) Update(c *gin.Context) {
 	existingTodo.Status = status
 	err = th.todoUsecase.Edit(existingTodo)
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "タスクの内容を更新できませんでした。")
+		SetFlashMessage(c, resultIsError, "タスクの内容を更新できませんでした。")
 		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
 		return
 	}
@@ -132,7 +132,7 @@ func (th *TodoHandler) Delete(c *gin.Context) {
 	id_s := c.Param("id")
 	id, err := strconv.ParseUint(id_s, 10, 64)
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "このタスクは削除できません。")
+		SetFlashMessage(c, resultIsError, "このタスクは削除できません。")
 		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
 		return
 	}
@@ -140,7 +140,7 @@ func (th *TodoHandler) Delete(c *gin.Context) {
 	err = th.todoUsecase.Delete(uint(id))
 
 	if err != nil {
-		SetFlashMessage(c, resultIserror, "削除できませんでした。")
+		SetFlashMessage(c, resultIsError, "削除できませんでした。")
 		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
 		return
 	}

@@ -22,7 +22,7 @@ func GetFlashMessage(c *gin.Context) FlashMessage {
 
 const (
 	resultIsSuccess string = "success"
-	resultIserror   string = "error"
+	resultIsError   string = "error"
 )
 
 const (

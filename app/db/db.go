@@ -9,22 +9,26 @@ import (
 	"gorm.io/gorm"
 )
 
-type SqlHandler struct {
+type SqlHandler interface {
+	GetConnection() *gorm.DB
+}
+
+type sqlHandler struct {
 	conn        *gorm.DB
 	initialized bool
 }
 
-func (handler *SqlHandler) GetConnection() *gorm.DB {
-	if sqlHandler == nil || !sqlHandler.initialized {
+func (handler *sqlHandler) GetConnection() *gorm.DB {
+	if handler == nil || !handler.initialized {
 		Init()
 	}
-	return sqlHandler.conn
+	return handler.conn
 }
 
-var sqlHandler *SqlHandler
+var handler *sqlHandler
 
 func Init() {
-	if sqlHandler != nil && sqlHandler.initialized {
+	if handler != nil && handler.initialized {
 		return
 	}
 
@@ -49,15 +53,15 @@ func Init() {
 	// マイグレーションを行う
 	dB.AutoMigrate(&models.Todo{})
 
-	sqlHandler = &SqlHandler{
+	handler = &sqlHandler{
 		conn:        dB,
 		initialized: true,
 	}
 }
 
-func GetSqlHandler() *SqlHandler {
-	if sqlHandler == nil || !sqlHandler.initialized {
+func GetSqlHandler() *sqlHandler {
+	if handler == nil || !handler.initialized {
 		Init()
 	}
-	return sqlHandler
+	return handler
 }
