@@ -1,8 +1,10 @@
 package db
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"testing"
 
@@ -23,6 +25,11 @@ type testHandler struct {
 // SqlHandlerインターフェイスの実装
 func (th *testHandler) GetConnection() *gorm.DB {
 	return th.conn
+}
+
+// Closerハンドラーの実装
+func (th *testHandler) Close() error {
+	return nil
 }
 
 // テストスイートの構造体
@@ -424,6 +431,72 @@ func (s *todoRepositoryTestSuite) TestDelete() {
 					assert.Equal(t, errors.New("record not found"), err)
 				}
 			}
+		})
+	}
+}
+
+type errorHandler struct {
+}
+
+func (eh *errorHandler) GetConnection() *gorm.DB {
+	return nil
+}
+
+func (eh *errorHandler) Close() error {
+	return errors.New("something is wrong")
+}
+func (s *todoRepositoryTestSuite) TestClose() {
+
+	cases := map[string]struct {
+		handler   SqlHandler
+		expectErr bool
+		err       error
+		logString string
+	}{
+		"正常ケース:エラーなし": {
+			handler:   &testHandler{conn: s.dbConn},
+			expectErr: false,
+			err:       nil,
+			logString: "",
+		},
+		"異常ケース:エラーあり": {
+			handler:   &errorHandler{},
+			expectErr: true,
+			err:       errors.New("something is wrong"),
+			logString: "something is wrong",
+		},
+	}
+
+	for name, tt := range cases {
+		s.T().Run(name, func(t *testing.T) {
+
+			// 初期処理
+			todoRepository := NewTodoRepository(tt.handler)
+
+			// slogの出力をキャプチャするためのバッファを作成
+			var logBuffer bytes.Buffer
+			logger := slog.New(slog.NewTextHandler(&logBuffer, &slog.HandlerOptions{}))
+
+			// 元のloggerを保存して、テスト後に復元
+			originalLogger := slog.Default()
+			slog.SetDefault(logger)
+			defer slog.SetDefault(originalLogger)
+
+			// 終了処理を実行する
+			err := todoRepository.Close()
+
+			// 結果を確認する（異常系）
+			if tt.expectErr {
+				if assert.Error(t, err) {
+					assert.Equal(t, tt.err, err)
+					assert.Contains(t, logBuffer.String(), tt.logString)
+				}
+				return
+			}
+
+			// 結果を確認する（正常系）
+			assert.NoError(t, err)
+			assert.Empty(t, logBuffer.String())
 		})
 	}
 }

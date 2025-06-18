@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -73,7 +75,7 @@ func TestIndex(t *testing.T) {
 
 			// テンプレートの読み込み
 			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
-			r.LoadHTMLGlob("/app/templates/*/*.html")
+			r.LoadHTMLGlob("/app/app/templates/*/*.html")
 
 			// リクエストを設定
 			req, _ := http.NewRequest("GET", "/todo", nil)
@@ -146,7 +148,7 @@ func TestShowByID(t *testing.T) {
 
 			// テンプレートの読み込み
 			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
-			r.LoadHTMLGlob("/app/templates/*/*.html")
+			r.LoadHTMLGlob("/app/app/templates/*/*.html")
 
 			// リクエストを設定
 			req, _ := http.NewRequest("GET", fmt.Sprintf("/todo/%v", tt.args.id), nil)
@@ -212,7 +214,7 @@ func TestCreate(t *testing.T) {
 
 			// テンプレートの読み込み
 			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
-			r.LoadHTMLGlob("/app/templates/*/*.html")
+			r.LoadHTMLGlob("/app/app/templates/*/*.html")
 
 			// フォームデータの組み立て
 			formData := url.Values{}
@@ -315,7 +317,7 @@ func TestUpdate(t *testing.T) {
 
 			// テンプレートの読み込み
 			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
-			r.LoadHTMLGlob("/app/templates/*/*.html")
+			r.LoadHTMLGlob("/app/app/templates/*/*.html")
 
 			// フォームデータの組み立て
 			formData := url.Values{}
@@ -404,7 +406,7 @@ func TestDelete(t *testing.T) {
 
 			// テンプレートの読み込み
 			// route.goと同じ指定だとエラーになったため、appからのパスで指定する
-			r.LoadHTMLGlob("/app/templates/*/*.html")
+			r.LoadHTMLGlob("/app/app/templates/*/*.html")
 
 			// リクエストを設定
 			req, _ := http.NewRequest("POST", fmt.Sprintf("/todo/%v", tt.args.id), nil)
@@ -425,6 +427,68 @@ func TestDelete(t *testing.T) {
 
 			// 結果を確認
 			assert.Equal(t, tt.want, w.Code)
+		})
+	}
+}
+
+func TestClose(t *testing.T) {
+
+	cases := map[string]struct {
+		want          error
+		prepareMockFn func(m *mock_usecases.MockTodoUsecase)
+		expectLog     bool
+		logString     string
+	}{
+		"正常ケース:エラー無し": {
+			want: nil,
+			prepareMockFn: func(m *mock_usecases.MockTodoUsecase) {
+				m.EXPECT().Close().Return(nil)
+			},
+			expectLog: false,
+			logString: "",
+		},
+		"異常ケース:エラーあり": {
+			want: errors.New("something is wrong"),
+			prepareMockFn: func(m *mock_usecases.MockTodoUsecase) {
+				m.EXPECT().Close().Return(errors.New("something is wrong"))
+			},
+			expectLog: true,
+			logString: "something is wrong",
+		},
+	}
+
+	for name, tt := range cases {
+		t.Run(name, func(t *testing.T) {
+
+			// モックの呼び出しを管理するControllerを生成
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// モックの生成
+			mock := mock_usecases.NewMockTodoUsecase(mockCtrl)
+
+			// テスト中に呼ばれるべき関数と帰り値を指定
+			tt.prepareMockFn(mock)
+
+			// slogの出力をキャプチャするためのバッファを作成
+			var logBuffer bytes.Buffer
+			logger := slog.New(slog.NewTextHandler(&logBuffer, &slog.HandlerOptions{}))
+
+			// 元のloggerを保存して、テスト後に復元
+			originalLogger := slog.Default()
+			slog.SetDefault(logger)
+			defer slog.SetDefault(originalLogger)
+
+			// mockを利用してテストする
+			handler := NewTodoHandler(mock)
+			handler.Close()
+
+			// ログの出力を確認
+			if tt.expectLog {
+				assert.Contains(t, logBuffer.String(), tt.logString)
+			} else {
+				assert.Empty(t, logBuffer.String())
+			}
 		})
 	}
 }
