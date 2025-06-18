@@ -1,6 +1,8 @@
 package db
 
 import (
+	"log/slog"
+
 	"github.com/MinadukiSekina/todo-go-app/app/domain/models"
 	"github.com/MinadukiSekina/todo-go-app/app/domain/repository"
 )
@@ -60,4 +62,14 @@ func (tr *todoRepository) Delete(id uint) error {
 	}
 	result := tr.handler.GetConnection().Delete(&models.Todo{}, id)
 	return result.Error
+}
+
+// todoRepositoryの終了処理
+func (th *todoRepository) Close() error {
+	// 依存先をクローズする
+	err := th.handler.Close()
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	return err
 }

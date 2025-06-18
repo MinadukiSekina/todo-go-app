@@ -1,7 +1,9 @@
 package usecases
 
 import (
+	"bytes"
 	"errors"
+	"log/slog"
 	"testing"
 
 	"github.com/MinadukiSekina/todo-go-app/app/domain/models"
@@ -281,6 +283,69 @@ func TestDelete(t *testing.T) {
 				assert.Equal(t, tt.err.Error(), err.Error())
 			} else {
 				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestClose(t *testing.T) {
+
+	cases := map[string]struct {
+		expectErr     bool
+		err           error
+		logString     string
+		prepareMockFn func(m *mock_repository.MockTodoRepository)
+	}{
+		"正常ケース:エラー無し": {
+			expectErr: false,
+			err:       nil,
+			logString: "",
+			prepareMockFn: func(m *mock_repository.MockTodoRepository) {
+				m.EXPECT().Close().Return(nil)
+			},
+		},
+		"異常ケース:エラーあり": {
+			expectErr: true,
+			err:       errors.New("something is wrong"),
+			logString: "something is wrong",
+			prepareMockFn: func(m *mock_repository.MockTodoRepository) {
+				m.EXPECT().Close().Return(errors.New("something is wrong"))
+			},
+		},
+	}
+
+	for name, tt := range cases {
+		t.Run(name, func(t *testing.T) {
+
+			// モックの呼び出しを管理するControllerを生成
+			mockCtrl := gomock.NewController(t)
+			defer mockCtrl.Finish()
+
+			// モックの生成
+			mock := mock_repository.NewMockTodoRepository(mockCtrl)
+			// テスト中に呼ばれるべき関数と帰り値を指定
+			tt.prepareMockFn(mock)
+
+			// slogの出力をキャプチャするためのバッファを作成
+			var logBuffer bytes.Buffer
+			logger := slog.New(slog.NewTextHandler(&logBuffer, &slog.HandlerOptions{}))
+
+			// 元のloggerを保存して、テスト後に復元
+			originalLogger := slog.Default()
+			slog.SetDefault(logger)
+			defer slog.SetDefault(originalLogger)
+
+			// mockを利用してテストする
+			Usecase := NewTodoUsecase(mock)
+			err := Usecase.Close()
+
+			// 結果を確認
+			if tt.expectErr {
+				assert.Equal(t, tt.err.Error(), err.Error())
+				assert.Contains(t, logBuffer.String(), tt.logString)
+			} else {
+				assert.NoError(t, err)
+				assert.Empty(t, logBuffer.String())
 			}
 		})
 	}

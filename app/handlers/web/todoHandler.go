@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 	"sort"
 	"strconv"
@@ -152,4 +153,12 @@ func (th *TodoHandler) Delete(c *gin.Context) {
 	}
 	SetFlashMessage(c, resultIsSuccess, "タスクの削除を完了しました。")
 	c.Redirect(http.StatusFound, "/todo")
+}
+
+// 終了処理を行う
+func (th *TodoHandler) Close() {
+	err := th.todoUsecase.Close()
+	if err != nil {
+		slog.Error(err.Error())
+	}
 }

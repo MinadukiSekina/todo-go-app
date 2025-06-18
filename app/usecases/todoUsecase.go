@@ -1,12 +1,16 @@
 package usecases
 
 import (
+	"log/slog"
+
+	"github.com/MinadukiSekina/todo-go-app/app/domain/interfaces"
 	"github.com/MinadukiSekina/todo-go-app/app/domain/models"
 	"github.com/MinadukiSekina/todo-go-app/app/domain/repository"
 )
 
 // ユースケースのインターフェイス
 type TodoUsecase interface {
+	interfaces.Closer
 	SearchByID(uint) (*models.Todo, error)
 	Show() (todos *[]models.Todo, err error)
 	Add(todo *models.Todo) error
@@ -53,4 +57,13 @@ func (uc *todoUsecase) Edit(todo *models.Todo) (err error) {
 func (uc *todoUsecase) Delete(id uint) (err error) {
 	err = uc.repos.Delete(id)
 	return
+}
+
+// ユースケースの終了処理を行う
+func (uc *todoUsecase) Close() error {
+	err := uc.repos.Close()
+	if err != nil {
+		slog.Error(err.Error())
+	}
+	return err
 }
