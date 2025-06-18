@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/MinadukiSekina/todo-go-app/app/domain/interfaces"
 	"github.com/MinadukiSekina/todo-go-app/app/domain/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -11,6 +12,7 @@ import (
 
 // データベース接続を管理するインターフェース
 type SqlHandler interface {
+	interfaces.Closer
 	GetConnection() *gorm.DB
 }
 
@@ -74,4 +76,17 @@ func GetSqlHandler() *sqlHandler {
 		Init()
 	}
 	return handler
+}
+
+// ハンドラーの終了処理を行う
+func (handler *sqlHandler) Close() error {
+	if handler.conn == nil || !handler.initialized {
+		return nil
+	}
+	db, err := handler.conn.DB()
+	if err != nil {
+		return err
+	}
+	err = db.Close()
+	return err
 }

@@ -18,6 +18,9 @@ func SetRouting() {
 	th := injector.InjectTodoHandler()
 	mh := injector.InjectMainHandler()
 
+	// ハンドラーの終了処理
+	defer th.Close()
+
 	// ルーティングの設定
 	router.GET("/", mh.Index)
 
