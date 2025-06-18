@@ -96,7 +96,7 @@ func (th *TodoHandler) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(id_s, 10, 64)
 	if err != nil {
 		SetFlashMessage(c, resultIsError, "このタスクは更新できません。")
-		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
+		c.Redirect(http.StatusSeeOther, "/todo")
 		return
 	}
 	title := c.PostForm("title")
@@ -118,7 +118,7 @@ func (th *TodoHandler) Update(c *gin.Context) {
 	existingTodo, err := th.todoUsecase.SearchByID(uint(id))
 	if err != nil {
 		SetFlashMessage(c, resultIsError, "対象となるタスクが存在しません。")
-		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
+		c.Redirect(http.StatusSeeOther, "/todo")
 		return
 	}
 
@@ -140,7 +140,7 @@ func (th *TodoHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(id_s, 10, 64)
 	if err != nil {
 		SetFlashMessage(c, resultIsError, "このタスクは削除できません。")
-		c.Redirect(http.StatusSeeOther, "/todo/"+id_s)
+		c.Redirect(http.StatusSeeOther, "/todo")
 		return
 	}
 
