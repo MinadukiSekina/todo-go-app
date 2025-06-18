@@ -13,7 +13,7 @@ import (
 type Status int
 
 const (
-	invalid Status = iota
+	invalid Status = iota - 1
 	NotStarted
 	Done
 )
