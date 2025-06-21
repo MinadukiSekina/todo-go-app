@@ -35,7 +35,6 @@ func (th *testHandler) Close() error {
 // テストスイートの構造体
 type todoRepositoryTestSuite struct {
 	suite.Suite
-	dbConn *gorm.DB
 }
 
 // テストスイートを実行する
@@ -79,13 +78,13 @@ func (s *todoRepositoryTestSuite) SetupSuite() {
 }
 
 // 各テスト終了時にDB接続を閉じる
-func (s *todoRepositoryTestSuite) Close() {
-	// テスト用に開いた接続を閉じる
-	sqlDB, err := s.dbConn.DB()
+func (ts *todoRepositoryTestSuite) Close(db *gorm.DB) {
+	conn, err := db.DB()
 	if err != nil {
-		s.Failf("failed to get underlying sql.DB", "%v", err)
+		ts.Suite.Failf("get connection is error. see: %v", err.Error())
+		return
 	}
-	defer sqlDB.Close()
+	conn.Close()
 }
 
 func (s *todoRepositoryTestSuite) TestFindAll() {
@@ -126,20 +125,18 @@ func (s *todoRepositoryTestSuite) TestFindAll() {
 			if err != nil {
 				s.Failf("database connection is not established", "%v", err)
 			}
-			// コネクションを格納する
-			s.dbConn = db
 
-			defer s.Close()
+			defer s.Close(db)
 
 			// 初期処理
-			sqlHandler := testHandler{conn: s.dbConn}
+			sqlHandler := testHandler{conn: db}
 			todoRepository := NewTodoRepository(&sqlHandler)
 
 			// 期待する結果が空以外の場合
 			if len(*tt.want) > 0 {
 				// データが無いはずなので登録する
 				for i := range *tt.want {
-					result := s.dbConn.Create(&(*tt.want)[i])
+					result := db.Create(&(*tt.want)[i])
 					if result.Error != nil {
 						s.T().Errorf("Creation is failed. error: %v", result.Error)
 					}
@@ -195,16 +192,14 @@ func (s *todoRepositoryTestSuite) TestFindById() {
 			if err != nil {
 				s.Failf("database connection is not established", "%v", err)
 			}
-			// コネクションを格納する
-			s.dbConn = db
 
-			defer s.Close()
+			defer s.Close(db)
 
 			// セットアップ関数を実行する
-			tt.setup(s.dbConn)
+			tt.setup(db)
 
 			// 初期処理
-			sqlHandler := testHandler{conn: s.dbConn}
+			sqlHandler := testHandler{conn: db}
 			todoRepository := NewTodoRepository(&sqlHandler)
 
 			todo, err := todoRepository.FindById(tt.want.ID)
@@ -246,13 +241,11 @@ func (s *todoRepositoryTestSuite) TestCreate() {
 			if err != nil {
 				s.Failf("database connection is not established", "%v", err)
 			}
-			// コネクションを格納する
-			s.dbConn = db
 
-			defer s.Close()
+			defer s.Close(db)
 
 			// 初期処理
-			sqlHandler := testHandler{conn: s.dbConn}
+			sqlHandler := testHandler{conn: db}
 			todoRepository := NewTodoRepository(&sqlHandler)
 
 			err = todoRepository.Create(tt.want)
@@ -317,16 +310,14 @@ func (s *todoRepositoryTestSuite) TestUpdate() {
 			if err != nil {
 				s.Failf("database connection is not established", "%v", err)
 			}
-			// コネクションを格納する
-			s.dbConn = db
 
-			defer s.Close()
+			defer s.Close(db)
 
 			// セットアップ関数を実行する
-			tt.setup(s.dbConn)
+			tt.setup(db)
 
 			// 初期処理
-			sqlHandler := testHandler{conn: s.dbConn}
+			sqlHandler := testHandler{conn: db}
 			todoRepository := NewTodoRepository(&sqlHandler)
 
 			// 更新対象のレコードを取得
@@ -400,16 +391,14 @@ func (s *todoRepositoryTestSuite) TestDelete() {
 			if err != nil {
 				s.Failf("database connection is not established", "%v", err)
 			}
-			// コネクションを格納する
-			s.dbConn = db
 
-			defer s.Close()
+			defer s.Close(db)
 
 			// セットアップ関数を実行する
-			tt.setup(s.dbConn)
+			tt.setup(db)
 
 			// 初期処理
-			sqlHandler := testHandler{conn: s.dbConn}
+			sqlHandler := testHandler{conn: db}
 			todoRepository := NewTodoRepository(&sqlHandler)
 
 			// 削除処理を実行する
@@ -447,6 +436,13 @@ func (eh *errorHandler) Close() error {
 }
 func (s *todoRepositoryTestSuite) TestClose() {
 
+	db, err := gorm.Open(mysql.New(mysql.Config{DSN: uuid.NewString(), DriverName: "txdb"}))
+	if err != nil {
+		s.Failf("database connection is not established", "%v", err)
+	}
+
+	defer s.Close(db)
+
 	cases := map[string]struct {
 		handler   SqlHandler
 		expectErr bool
@@ -454,7 +450,7 @@ func (s *todoRepositoryTestSuite) TestClose() {
 		logString string
 	}{
 		"正常ケース:エラーなし": {
-			handler:   &testHandler{conn: s.dbConn},
+			handler:   &testHandler{conn: db},
 			expectErr: false,
 			err:       nil,
 			logString: "",
