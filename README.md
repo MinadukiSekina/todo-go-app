@@ -19,6 +19,9 @@ Todoの一覧表示や詳細編集、削除機能などがあります。
   * Air
   * Delve
 
+## 解説記事
+**[Todoアプリを作ってGoへ入門！：シリーズまとめ](https://qiita.com/MinadukiSekina/items/3f6e4420cd493703bb73)**
+
 ## 環境構築
 DevContainerを使用しています。`db/db.env`を作成して下記の環境変数を記入した後、「Reopen in Container」を実行してください。
 
